@@ -23,6 +23,12 @@ app.use(cors({ origin: allowedOrigin }));
 // Parse incoming JSON bodies so req.body is populated.
 app.use(express.json());
 
+// Disable caching for all API responses so browsers always fetch fresh data
+app.use('/api', (req, res, next) => {
+  res.set('Cache-Control', 'no-store');
+  next();
+});
+
 // ─── Bootstrap ───────────────────────────────────────────────────────────────
 // We must wait for the DB module to finish loading the WASM binary and schema
 // before registering routes that depend on it.
