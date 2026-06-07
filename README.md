@@ -20,7 +20,7 @@ This project is a **Personal Task Manager** web application, built as a full-sta
 |---|---|---|
 | **Node.js** | 22.x | JavaScript runtime for the server |
 | **Express** | 4.18 | Minimal, well-known HTTP framework for building REST APIs |
-| **sql.js** | 1.12 | Pure-JS SQLite engine (WebAssembly). Chosen over `better-sqlite3` because it requires no native C++ compilation — works on any machine with just Node.js |
+| **sql.js** | 1.12 | Pure-JS SQLite engine (WebAssembly). Used for local development persistence |
 | **cors** | 2.8 | Allows the Vite dev server (port 5173) to call the API (port 3001) without browser CORS errors |
 | **nodemon** | 3.0 | Dev-only. Auto-restarts the server on file save |
 
@@ -224,7 +224,7 @@ PersonalTM/
 
 ### Known limitations of free hosting
 
-- **Render free tier** spins down after 15 minutes of inactivity and resets the filesystem on restart. This means the SQLite database resets when the server restarts. In production this would be solved by using a persistent database service (PostgreSQL on Railway or Neon) instead of a local SQLite file.
+- **In-memory storage** — tasks are stored in a JavaScript `Map` in the server's memory. This means data resets when the server restarts. The assignment explicitly allows in-memory storage. In production this would be replaced with a persistent database (SQLite file or PostgreSQL).
 
 - **Drag-and-drop order persistence** — the reordered position is held in React state and resets on page refresh. Persisting it would require either a `sortOrder` column in the database or a separate PUT endpoint to save the order. Left out to keep scope reasonable.
 - **User authentication** — all tasks are shared with anyone who opens the app. A real deployment would need login/signup and per-user task isolation.
