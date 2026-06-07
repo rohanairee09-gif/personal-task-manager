@@ -1,51 +1,34 @@
 // index.js — Express app entry point
-//
-// sql.js initialises asynchronously (loads WebAssembly), so we wrap startup
-// in an async IIFE and only begin listening once the DB is ready.
 
-const express = require('express');
-const cors    = require('cors');
+const express    = require('express');
+const cors       = require('cors');
+const tasksRouter = require('./routes/tasks');
 
 const app  = express();
 const PORT = process.env.PORT || 3001;
 
 // ─── Middleware ──────────────────────────────────────────────────────────────
 
-// Allow requests from the Vite dev server in development.
-// In production, allow the deployed frontend URL (set via FRONTEND_URL env var)
-// or fall back to * so any origin can connect.
 const allowedOrigin = process.env.NODE_ENV === 'production'
   ? (process.env.FRONTEND_URL || '*')
   : 'http://localhost:5173';
 
 app.use(cors({ origin: allowedOrigin }));
-
-// Parse incoming JSON bodies so req.body is populated.
 app.use(express.json());
 
-// Disable caching for all API responses so browsers always fetch fresh data
+// Disable browser caching for all API responses
 app.use('/api', (req, res, next) => {
   res.set('Cache-Control', 'no-store');
   next();
 });
 
-// ─── Bootstrap ───────────────────────────────────────────────────────────────
-// We must wait for the DB module to finish loading the WASM binary and schema
-// before registering routes that depend on it.
+// ─── Routes ──────────────────────────────────────────────────────────────────
 
-(async () => {
-  // Initialise the database singleton
-  const db = await require('./db')();
+app.use('/api/tasks', tasksRouter);
+app.get('/health', (_req, res) => res.json({ status: 'ok' }));
 
-  // Inject the db instance into the router
-  const tasksRouter = require('./routes/tasks');
-  tasksRouter.db = db;
-  app.use('/api/tasks', tasksRouter);
+// ─── Start ───────────────────────────────────────────────────────────────────
 
-  // Simple health-check endpoint
-  app.get('/health', (_req, res) => res.json({ status: 'ok' }));
-
-  app.listen(PORT, () => {
-    console.log(`Task Manager API running on http://localhost:${PORT}`);
-  });
-})();
+app.listen(PORT, () => {
+  console.log(`Task Manager API running on http://localhost:${PORT}`);
+});
