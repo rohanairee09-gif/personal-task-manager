@@ -1,0 +1,11 @@
+{
+  "name": "personal-task-manager",
+  "version": "1.0.0",
+  "description": "Monorepo root — run both client and server from here",
+  "scripts": {
+    "install:all": "cd server && npm install && cd ../client && npm install",
+    "dev:server": "cd server && npm run dev",
+    "dev:client": "cd client && npm run dev"
+  },
+  "private": true
+}
