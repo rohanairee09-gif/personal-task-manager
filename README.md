@@ -222,7 +222,9 @@ PersonalTM/
 
 ## Next Steps
 
-### What was intentionally left out
+### Known limitations of free hosting
+
+- **Render free tier** spins down after 15 minutes of inactivity and resets the filesystem on restart. This means the SQLite database resets when the server restarts. In production this would be solved by using a persistent database service (PostgreSQL on Railway or Neon) instead of a local SQLite file.
 
 - **Drag-and-drop order persistence** — the reordered position is held in React state and resets on page refresh. Persisting it would require either a `sortOrder` column in the database or a separate PUT endpoint to save the order. Left out to keep scope reasonable.
 - **User authentication** — all tasks are shared with anyone who opens the app. A real deployment would need login/signup and per-user task isolation.
