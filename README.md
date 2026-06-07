@@ -8,7 +8,8 @@ This project is a **Personal Task Manager** web application, built as a full-sta
 
 ## Live Demo Links
 
-> _Not yet deployed. To run the project locally, follow the steps below._
+- **Frontend (Vercel):** https://personal-task-manager-qr8avlk25-rohanairee.vercel.app
+- **Backend API (Render):** https://personal-task-manager-yft0.onrender.com
 
 ---
 
