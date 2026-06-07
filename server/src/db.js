@@ -1,11 +1,9 @@
 // db.js — SQLite database initialisation using sql.js (pure JS, no native build)
 //
-// In production (Render), we run fully in-memory — no file persistence.
-// This is because Render's free tier resets the filesystem on every restart,
-// which caused deleted tasks to reappear. In-memory is honest: data lasts
-// as long as the server is alive.
-//
-// In development, we persist to tasks.db so data survives local restarts.
+// We use a module-level singleton so every require('./db') call returns
+// the exact same database instance. This is critical — if different parts
+// of the app get different instances, changes made in one won't be visible
+// in the other.
 
 const initSqlJs = require('sql.js');
 const fs        = require('fs');
@@ -14,13 +12,15 @@ const path      = require('path');
 const IS_PROD = process.env.NODE_ENV === 'production';
 const DB_PATH = path.join(__dirname, '..', 'tasks.db');
 
-let dbWrapper = null;
+// THE singleton — only one db object ever exists in this process
+let _db = null;
 
-async function init() {
+// Returns the singleton, initialising it on first call
+async function getDb() {
+  if (_db) return _db; // already initialised — return same instance
+
   const SQL = await initSqlJs();
 
-  // In production: always start with a fresh in-memory database.
-  // In development: load from file if it exists, otherwise start fresh.
   let db;
   if (!IS_PROD && fs.existsSync(DB_PATH)) {
     const fileBuffer = fs.readFileSync(DB_PATH);
@@ -29,15 +29,11 @@ async function init() {
     db = new SQL.Database();
   }
 
-  // Persist helper — only writes to disk in development.
   function persist() {
-    if (IS_PROD) return; // skip file writes on Render
+    if (IS_PROD) return;
     const data = db.export();
     fs.writeFileSync(DB_PATH, Buffer.from(data));
   }
-
-  // ── Schema ──────────────────────────────────────────────────────────────
-  const isNewDb = IS_PROD || !fs.existsSync(DB_PATH);
 
   db.run(`
     CREATE TABLE IF NOT EXISTS tasks (
@@ -50,11 +46,8 @@ async function init() {
     )
   `);
 
-  if (isNewDb) {
-    persist();
-  }
+  if (!IS_PROD) persist();
 
-  // ── Type fixer ───────────────────────────────────────────────────────────
   function fixTypes(row) {
     if (!row) return row;
     return {
@@ -64,7 +57,7 @@ async function init() {
     };
   }
 
-  dbWrapper = {
+  _db = {
     exec(sql) {
       db.run(sql);
       persist();
@@ -127,7 +120,7 @@ async function init() {
     },
   };
 
-  return dbWrapper;
+  return _db;
 }
 
-module.exports = init();
+module.exports = getDb;

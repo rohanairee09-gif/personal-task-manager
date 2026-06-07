@@ -34,12 +34,10 @@ app.use('/api', (req, res, next) => {
 // before registering routes that depend on it.
 
 (async () => {
-  // Await the db promise — resolves to the shared in-memory database instance.
-  const db = await require('./db');
+  // Initialise the database singleton
+  const db = await require('./db')();
 
-  // Mount all task CRUD routes after DB is ready.
-  // Inject the db instance directly onto the router so all handlers share
-  // the same in-memory database (avoids re-resolving the promise per request).
+  // Inject the db instance into the router
   const tasksRouter = require('./routes/tasks');
   tasksRouter.db = db;
   app.use('/api/tasks', tasksRouter);
