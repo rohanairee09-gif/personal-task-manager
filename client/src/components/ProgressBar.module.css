@@ -1,0 +1,64 @@
+.wrap {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-md);
+  padding: 1rem 1.25rem;
+  margin-bottom: 1.25rem;
+  box-shadow: var(--shadow-sm);
+}
+
+.labelRow {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 0.5rem;
+}
+
+.label {
+  font-size: 0.78rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  color: var(--text-secondary);
+}
+
+.percent {
+  font-size: 1rem;
+  font-weight: 700;
+  color: var(--text-primary);
+}
+
+/* ── Track (background bar) ──────────────────────────────────────────────── */
+.track {
+  width: 100%;
+  height: 8px;
+  background: var(--border);
+  border-radius: var(--radius-full);
+  overflow: hidden;
+}
+
+/* ── Fill (coloured progress) ────────────────────────────────────────────── */
+.fill {
+  height: 100%;
+  border-radius: var(--radius-full);
+  transition: width 0.4s ease;
+}
+
+.started {
+  background: linear-gradient(90deg, var(--accent), #818cf8);
+}
+
+.halfway {
+  background: linear-gradient(90deg, var(--accent), #a78bfa);
+}
+
+.complete {
+  background: linear-gradient(90deg, var(--success), #34d399);
+}
+
+/* ── Sub text ────────────────────────────────────────────────────────────── */
+.sub {
+  margin: 0.4rem 0 0;
+  font-size: 0.78rem;
+  color: var(--text-muted);
+}

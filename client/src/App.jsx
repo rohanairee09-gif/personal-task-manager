@@ -15,6 +15,7 @@ import { useTasks } from './hooks/useTasks';
 import TaskForm from './components/TaskForm';
 import FilterBar from './components/FilterBar';
 import TaskList from './components/TaskList';
+import ProgressBar from './components/ProgressBar';
 import styles from './App.module.css';
 
 export default function App() {
@@ -98,6 +99,11 @@ export default function App() {
       <main className={styles.main}>
         {/* Task creation form */}
         <TaskForm onAdd={addTask} />
+
+        {/* Progress bar */}
+        {!loading && !error && tasks.length > 0 && (
+          <ProgressBar total={tasks.length} completed={completedCount} />
+        )}
 
         {/* Search bar */}
         <div className={styles.searchWrap}>
