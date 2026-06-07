@@ -6,34 +6,29 @@
 //   PUT    /api/tasks/:id   → update an existing task (partial update supported)
 //   DELETE /api/tasks/:id   → delete a task by id
 //
-// Note: `require('../db')` returns a Promise. We resolve it once at module load
-// time via a module-level `let db` that is populated in `getDb()`.
+// The db instance is attached to router.db by index.js after the database
+// initialises. This ensures all routes share the exact same in-memory database
+// instance rather than re-resolving the promise and getting a fresh instance.
 
 const express = require('express');
 const router  = express.Router();
 
-// db is the wrapper object resolved from the sql.js init promise.
-// We resolve it lazily on the first request (the app already awaits it in
-// index.js, so by the time any route runs the promise is fulfilled).
-let db;
-async function getDb() {
-  if (!db) db = await require('../db');
-  return db;
+// Returns the shared database instance injected by index.js
+function getDb() {
+  return router.db;
 }
 
 // ─── Helpers ────────────────────────────────────────────────────────────────
 
-// sql.js returns numbers for INTEGER columns; convert 0/1 → boolean for
-// the JSON response so the frontend receives proper JS types.
 function formatTask(row) {
   if (!row) return row;
   return { ...row, isComplete: row.isComplete === 1 };
 }
 
 // ─── GET /api/tasks ──────────────────────────────────────────────────────────
-router.get('/', async (req, res) => {
+router.get('/', (req, res) => {
   try {
-    const db    = await getDb();
+    const db    = getDb();
     const tasks = db.prepare('SELECT * FROM tasks ORDER BY createdAt DESC').all();
     res.json(tasks.map(formatTask));
   } catch (err) {
@@ -43,7 +38,7 @@ router.get('/', async (req, res) => {
 });
 
 // ─── POST /api/tasks ─────────────────────────────────────────────────────────
-router.post('/', async (req, res) => {
+router.post('/', (req, res) => {
   const { title, description = null, dueDate = null } = req.body;
 
   if (!title || title.trim() === '') {
@@ -51,7 +46,7 @@ router.post('/', async (req, res) => {
   }
 
   try {
-    const db        = await getDb();
+    const db        = getDb();
     const createdAt = new Date().toISOString();
 
     const { lastInsertRowid } = db.prepare(`
@@ -68,19 +63,17 @@ router.post('/', async (req, res) => {
 });
 
 // ─── PUT /api/tasks/:id ──────────────────────────────────────────────────────
-// Supports partial updates — fields not sent in the body keep their current values.
-router.put('/:id', async (req, res) => {
+router.put('/:id', (req, res) => {
   const { id } = req.params;
 
   try {
-    const db       = await getDb();
+    const db       = getDb();
     const existing = db.prepare('SELECT * FROM tasks WHERE id = ?').get(id);
 
     if (!existing) {
       return res.status(404).json({ error: 'Task not found.' });
     }
 
-    // Merge incoming fields with stored values
     const title       = req.body.title       !== undefined ? req.body.title.trim()  : existing.title;
     const description = req.body.description !== undefined ? req.body.description   : existing.description;
     const dueDate     = req.body.dueDate     !== undefined ? req.body.dueDate       : existing.dueDate;
@@ -110,11 +103,11 @@ router.put('/:id', async (req, res) => {
 });
 
 // ─── DELETE /api/tasks/:id ───────────────────────────────────────────────────
-router.delete('/:id', async (req, res) => {
+router.delete('/:id', (req, res) => {
   const { id } = req.params;
 
   try {
-    const db       = await getDb();
+    const db       = getDb();
     const existing = db.prepare('SELECT id FROM tasks WHERE id = ?').get(id);
 
     if (!existing) {
