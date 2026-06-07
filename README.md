@@ -8,7 +8,7 @@ This project is a **Personal Task Manager** web application, built as a full-sta
 
 ## Live Demo Links
 
-- **Frontend (Vercel):** https://personal-task-manager-qr8avlk25-rohanairee.vercel.app
+- **Frontend (Vercel):** https://personal-task-manager-smoky.vercel.app
 - **Backend API (Render):** https://personal-task-manager-yft0.onrender.com
 
 ---
